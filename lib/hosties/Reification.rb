@@ -16,12 +16,10 @@ class UsesAttributes
       # Add in the attribute
       self.metaclass.send(:attr_accessor, attr)
       # Define a constrained setter
-      self.metaclass.send(:define_method, "#{attr}=") do |val|
+      self.metaclass.send(:define_method, attr) do |val|
         raise ArgumentError, "Invalid value" unless has_attributes.valid?(attr, val)
         instance_variable_set "@#{attr}", val
       end
-      # Define a liberal accessor
-      self.metaclass.send(:define_method, attr) do instance_variable_get "@#{attr}" end
     end
   end
 
@@ -46,6 +44,7 @@ class HostBuilder < UsesAttributes
     @type = type
     @definition = Hosties::HostDefinitions[@type]
     @hostname = hostname
+    @service_ports = {} # Map of service type to port
     super(@definition) # Creates attribute code
     # Services are really just a special kind of attribute, but for now I'll
     # keep them separate. I'm thinking maybe I could add a new type of attribute
@@ -55,10 +54,7 @@ class HostBuilder < UsesAttributes
       self.metaclass.send(:attr_accessor, service_type)
       self.metaclass.send(:define_method, service_type) do |port|
         raise ArgumentError, "Port number required" unless port.is_a? Integer
-        instance_variable_set "@#{service_type}", port
-        self.metaclass.send(:define_method, service_type) do 
-          instance_variable_get "@#{service_type}" 
-        end
+        @service_ports[service_type] = port
       end
     end
   end
@@ -66,10 +62,10 @@ class HostBuilder < UsesAttributes
   def finish
     # Ensure all services have been set
     @definition.services.each do |svc|
-      raise ArgumentError, "Missing service #{svc}" if instance_variable_set "@#{svc}".nil?
+      raise ArgumentError, "Missing service #{svc}" if @service_ports[svc].nil?
     end
     # TODO: More clever data repackaging
-    super.merge({ :hostname => @hostname })
+    super.merge({ :hostname => @hostname }).merge(@service_ports)
   end
 end
 
@@ -79,7 +75,7 @@ class EnvironmentBuilder < UsesAttributes
     if Hosties::EnvironmentDefinitions[type].nil? then
       raise ArgumentError, "Unrecognized environment type"
     end
-    @hosts = []
+    @hosts = {} # host type => array of hosts' data
     @type = type
     @definition = Hosties::EnvironmentDefinitions[@type]
     super(@definition) # Creates attribute code
@@ -90,19 +86,25 @@ class EnvironmentBuilder < UsesAttributes
         begin
           builder = HostBuilder.new(host_type, hostname)
           builder.instance_eval(&block)
-          @hosts << builder.finish
+          if @hosts[host_type].nil? then @hosts[host_type] = [] end
+          @hosts[host_type] << builder.finish
         rescue ArgumentError => ex
-          # Let the user know somehow
+          puts "Problem declaring host: #{ex}"
+          raise ex
         end
       end
     end
   end
   def finish
+    # Verify all of the required hosts were set
+    @definition.hosts.each do |host_type| 
+      raise ArgumentError, "Missing #{host_type} host" unless @hosts.include? host_type
+    end
+    retval = super.merge({ :hosts => @hosts })
     if Hosties::RegisteredEnvironments[@type].nil? then
       Hosties::RegisteredEnvironments[@type] = []
     end
-    retval = super.merge({ :hosts => @hosts })
-    Hosties::RegisteredEnvironments[@name] << retval
+    Hosties::RegisteredEnvironments[@type] << retval
     retval
   end
 end
@@ -112,7 +114,9 @@ def environment_for(type, &block)
   begin
     builder = EnvironmentBuilder.new(type)
     builder.instance_eval(&block)
-    builder.finish
+    data = builder.finish
   rescue ArgumentError => ex
+    puts "Problem declaring environment: #{ex}"
+    raise ex
   end
 end

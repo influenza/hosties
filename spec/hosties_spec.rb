@@ -44,11 +44,9 @@ describe Hosties do
     definition.have_attributes(:x, :y, :z)
     definition.where(:x).can_be("hello", "turkey", 42)
     instance = UsesAttributes.new(definition)
-    instance.y = "Why?!"
-    expect(instance.y).to eq("Why?!")
-    expect { instance.x = 31 }.to raise_error(ArgumentError)
-    instance.x = "turkey"
-    expect(instance.x).to eq("turkey")
+    instance.x "hello"
+    expect { instance.x 31 }.to raise_error(ArgumentError)
+    instance.x "turkey"
   end
 
   it 'can declare a host' do
@@ -79,7 +77,45 @@ describe Hosties do
       have_service :http
     end
     instance = HostBuilder.new(:web_host, "0.0.0.0")
-    instance.http = 10.4
-    expect { instance.finish }.to raise_error(ArgumentError)
+    expect { instance.http 10.4 }.to raise_error(ArgumentError)
+  end
+
+  it 'can fully declare an environment' do
+    # Declare the host types
+    host_type :monitoring do
+      have_services :logging, :http
+    end
+    host_type :service_host do
+      have_services :service_port, :rest, :jmx
+      have_attribute :uuid
+    end
+    # Declare this product's environment makeup
+    environment_type :typical_product do
+      need :service_host, :monitoring
+      have_attribute :environment
+      where(:environment).can_be(:dev, :qa, :live)
+    end
+    # make one!
+    environment_for :typical_product do
+      environment :qa
+      monitoring "192.168.0.1" do
+        logging 8888
+        http 80
+      end
+      service_host "192.168.0.2" do
+        service_port 1234
+        rest 8080
+        jmx 9876
+        uuid "81E3C1D4-C040-4D59-A56F-4273384D576B"
+      end
+    end
+    expect(Hosties::RegisteredEnvironments[:typical_product].nil?).to eq(false)
+    data = Hosties::RegisteredEnvironments[:typical_product].first
+    expect(data[:environment]).to eq(:qa)
+    expect(data[:hosts][:monitoring].size).to eq(1)
+    expect(data[:hosts][:service_host].size).to eq(1)
+    service_host = data[:hosts][:service_host].first
+    expect(service_host[:service_port]).to eq(1234)
+    expect(service_host[:uuid]).to eq("81E3C1D4-C040-4D59-A56F-4273384D576B")
   end
 end
