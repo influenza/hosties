@@ -5,7 +5,7 @@ describe Hosties do
     host_type :special_host do
     end
     instance = HostBuilder.new(:special_host, "0.0.0.0")
-    expect(instance.finish).to eq({ :hostname => "0.0.0.0"})
+    expect(instance.finish).to eq({ :hostname => "0.0.0.0", :type => :special_host})
   end
 
   it 'catches missing services' do

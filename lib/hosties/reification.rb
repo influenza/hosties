@@ -65,7 +65,7 @@ class HostBuilder < UsesAttributes
       raise ArgumentError, "Missing service #{svc}" if @service_ports[svc].nil?
     end
     # TODO: More clever data repackaging
-    super.merge({ :hostname => @hostname }).merge(@service_ports)
+    super.merge({ :hostname => @hostname, :type => @type }).merge(@service_ports)
   end
 end
 
