@@ -55,7 +55,6 @@ end
 
 # Defines what a host of a certain type looks like
 class HostRequirement < HasAttributes
-  @@requirements = {}
   attr_reader :type, :services
   def initialize(type)
     super()
@@ -74,11 +73,7 @@ class HostRequirement < HasAttributes
   alias_method :have_service, :have_services
 
   def finished
-    @@requirements[@type] = self
-  end
-
-  def self.all
-    @@requirements
+    Hosties::HostDefinitions[@type] = self
   end
 end
 
@@ -89,13 +84,15 @@ def host_type(symbol, &block)
     builder.instance_eval(&block)
     builder.finished
   rescue ArgumentError => ex
-    puts "Problem defining host \"#{symbol}\": #{ex}"
+    # TODO: There must be a better way!
+    # I'd like to provide some feedback in this case, but I don't 
+    # like having this show up in test output. 
+    #puts "Problem defining host \"#{symbol}\": #{ex}"
   end
 end
 
 # Used to describe an environment.
 class EnvironmentRequirement < HasAttributes
-  @@requirements = {}
   attr_reader :type, :hosts
   def initialize(type)
     super()
@@ -109,18 +106,14 @@ class EnvironmentRequirement < HasAttributes
   def need(host1, *more)
     sum = more << host1
     # Array doesn't have an 'exists' method, so behold - map reduce wankery!
-    unless sum.map { |x| HostRequirement.all.include? x }.reduce(true) { |xs, x| x & xs }
+    unless sum.map { |x| Hosties::HostDefinitions.include? x }.reduce(true) { |xs, x| x & xs }
       raise ArgumentError, "Unrecognized host type"
     end
     @hosts += sum
   end
 
   def finished
-    @@requirements[@type] = self
-  end
-
-  def self.all
-    @@requirements
+    Hosties::EnvironmentDefinitions[@type] = self
   end
 end
 
@@ -131,6 +124,7 @@ def environment_type(symbol, &block)
     builder.instance_eval(&block)
     builder.finished
   rescue ArgumentError => ex
-    puts "Problem describing environment \"#{builder.type}\": #{ex}"
+    # TODO: Same as above, find a better way to get this information out
+    #puts "Problem describing environment \"#{builder.type}\": #{ex}"
   end
 end
