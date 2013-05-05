@@ -1,54 +1,6 @@
 require 'spec_helper'
 
 describe Hosties do
-  it 'defines host types' do
-    # Declare a host type
-    host_type :logger do
-      have_services :jmx, :rest, :http, :https
-      have_attributes :control_mbean, :default_user
-    end
-  end
-
-  it 'defines environments comprised of host types' do
-    host_type :mutant_maker do
-      have_services :laser_blaster, :chainsaw_arms, :coffee_bar
-      have_attributes :height, :weight, :brutality
-    end
-    host_type :turkey_blaster do
-      have_service :turkey_blast
-      have_attribute :blast_force
-    end
-    environment_type :weird_thanksgiving do
-      need :mutant_maker, :turkey_blaster
-      have_attribute :weirdness_factor
-    end
-  end
-
-  it 'rejects host definitions with constraints on nonexistent attributes' do
-    host_type :fake_attributes do
-      have_attributes :foo, :bar
-      where(:baz).can_be "Anything!", "It doesn't", "exist anyway."
-    end
-    expect(Hosties::HostDefinitions.include? :fake_attributes).to eq(false)
-  end
-
-  it 'rejects environment definitions that need undefined host types' do
-    environment_type :failure do
-      need :nonexistent
-    end
-    expect(Hosties::EnvironmentDefinitions.include? :failure).to eq(false)
-  end
-
-  it 'can enforce attribute constraints' do
-    definition = HasAttributes.new
-    definition.have_attributes(:x, :y, :z)
-    definition.where(:x).can_be("hello", "turkey", 42)
-    instance = UsesAttributes.new(definition)
-    instance.x "hello"
-    expect { instance.x 31 }.to raise_error(ArgumentError)
-    instance.x "turkey"
-  end
-
   it 'can declare a host' do
     host_type :special_host do
     end
@@ -80,6 +32,20 @@ describe Hosties do
     expect { instance.http 10.4 }.to raise_error(ArgumentError)
   end
 
+  it 'catches missing host requirements' do
+    host_type :type_a do
+    end
+    host_type :type_b do
+    end
+    environment_type :needy_environment do
+      need :type_a, :type_b
+    end
+    builder = EnvironmentBuilder.new(:needy_environment)
+    builder.type_a "0.0.0.0" do end
+    # No type_b specified
+    expect { builder.finish }.to raise_error(ArgumentError)
+  end
+
   it 'can fully declare an environment' do
     # Declare the host types
     host_type :monitoring do
@@ -102,7 +68,11 @@ describe Hosties do
         logging 8888
         http 80
       end
-      service_host "192.168.0.2" do
+      monitoring "192.168.0.2" do
+        logging 8888
+        http 80
+      end
+      service_host "192.168.0.3" do
         service_port 1234
         rest 8080
         jmx 9876
@@ -112,24 +82,10 @@ describe Hosties do
     expect(Hosties::RegisteredEnvironments[:typical_product].nil?).to eq(false)
     data = Hosties::RegisteredEnvironments[:typical_product].first
     expect(data[:environment]).to eq(:qa)
-    expect(data[:hosts][:monitoring].size).to eq(1)
+    expect(data[:hosts][:monitoring].size).to eq(2) # Two monitoring hosts
     expect(data[:hosts][:service_host].size).to eq(1)
     service_host = data[:hosts][:service_host].first
     expect(service_host[:service_port]).to eq(1234)
     expect(service_host[:uuid]).to eq("81E3C1D4-C040-4D59-A56F-4273384D576B")
-  end
-
-  it 'catches missing host requirements' do
-    host_type :type_a do
-    end
-    host_type :type_b do
-    end
-    environment_type :needy_environment do
-      need :type_a, :type_b
-    end
-    builder = EnvironmentBuilder.new(:needy_environment)
-    builder.type_a "0.0.0.0" do end
-    # No type_b specified
-    expect { builder.finish }.to raise_error(ArgumentError)
   end
 end
