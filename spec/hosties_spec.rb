@@ -79,13 +79,36 @@ describe Hosties do
         uuid "81E3C1D4-C040-4D59-A56F-4273384D576B"
       end
     end
-    expect(Hosties::RegisteredEnvironments[:typical_product].nil?).to eq(false)
-    data = Hosties::RegisteredEnvironments[:typical_product].first
+    expect(Hosties::Environments[:typical_product].nil?).to eq(false)
+    data = Hosties::Environments[:typical_product].first
     expect(data[:environment]).to eq(:qa)
     expect(data[:hosts][:monitoring].size).to eq(2) # Two monitoring hosts
     expect(data[:hosts][:service_host].size).to eq(1)
     service_host = data[:hosts][:service_host].first
     expect(service_host[:service_port]).to eq(1234)
     expect(service_host[:uuid]).to eq("81E3C1D4-C040-4D59-A56F-4273384D576B")
+  end
+
+  it 'can group environments by attribute' do
+    host_type :foo do end
+    host_type :bar do end
+    environment_type :foobar do
+      need :foo, :bar
+      have_attribute :env_type
+      where(:env_type).can_be :dev, :qa, :live
+      grouped_by :env_type
+    end
+    environment_for :foobar do
+      foo "0.0.0.0" do end
+      bar "0.0.0.0" do end
+      env_type :dev
+    end
+    environment_for :foobar do
+      foo "0.0.0.0" do end
+      bar "0.0.0.0" do end
+      env_type :qa
+    end
+    expect(Hosties::GroupedEnvironments[:foobar][:dev].size).to eq(1)
+    expect(Hosties::GroupedEnvironments[:foobar][:qa].size).to eq(1)
   end
 end

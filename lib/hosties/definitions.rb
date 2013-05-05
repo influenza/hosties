@@ -93,7 +93,7 @@ end
 
 # Used to describe an environment.
 class EnvironmentRequirement < HasAttributes
-  attr_reader :type, :hosts
+  attr_reader :type, :hosts, :grouping
   def initialize(type)
     super()
     @type = type
@@ -110,6 +110,13 @@ class EnvironmentRequirement < HasAttributes
       raise ArgumentError, "Unrecognized host type"
     end
     @hosts += sum
+  end
+
+  # Optionally specify an attribute to group by when registering 
+  # environments of this type.
+  def grouped_by(attr) 
+    raise ArgumentError, "Unknown attribute #{attr}" unless @attributes.include?(attr)
+    @grouping = attr
   end
 
   def finished

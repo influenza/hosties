@@ -8,5 +8,7 @@ module Hosties
   # Host definitions, keyed by type
   HostDefinitions = {}
   # Environment instances, definition type => array of instances
-  RegisteredEnvironments = {}
+  Environments = Hash.new{|h,k| h[k] = []}
+  # Maps type => hash of specified 'grouped_by' value to array of matches
+  GroupedEnvironments = {}
 end

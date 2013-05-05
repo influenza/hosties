@@ -95,28 +95,33 @@ class EnvironmentBuilder < UsesAttributes
       end
     end
   end
+
   def finish
     # Verify all of the required hosts were set
     @definition.hosts.each do |host_type| 
       raise ArgumentError, "Missing #{host_type} host" unless @hosts.include? host_type
     end
     retval = super.merge({ :hosts => @hosts })
-    if Hosties::RegisteredEnvironments[@type].nil? then
-      Hosties::RegisteredEnvironments[@type] = []
+    Hosties::Environments[@type] << retval
+    # Add ourselves into the grouped listing if necessary
+    attr = @definition.grouping
+    unless attr.nil? then # TODO: This is really ugly
+      if Hosties::GroupedEnvironments[@type].nil? then
+        Hosties::GroupedEnvironments[@type] = Hash.new{|h,k| h[k] = []}
+      end
+      Hosties::GroupedEnvironments[@type][retval[attr]] << retval
     end
-    Hosties::RegisteredEnvironments[@type] << retval
     retval
   end
 end
 
 def environment_for(type, &block)
-  # Verify this is a legit type of environment
   begin
     builder = EnvironmentBuilder.new(type)
     builder.instance_eval(&block)
     data = builder.finish
   rescue ArgumentError => ex
-    #puts "Problem declaring environment: #{ex}"
+    puts "Problem declaring environment: #{ex}"
     raise ex
   end
 end

@@ -32,4 +32,9 @@ describe EnvironmentRequirement do
     builder = EnvironmentRequirement.new(:failure)
     expect { builder.need(:nonexistent) }.to raise_error(ArgumentError)
   end
+
+  it 'rejects groupings for unknown attributes' do
+    builder = EnvironmentRequirement.new(:failure)
+    expect { builder.grouped_by(:nonexistent) }.to raise_error(ArgumentError)
+  end
 end
