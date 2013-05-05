@@ -118,4 +118,18 @@ describe Hosties do
     expect(service_host[:service_port]).to eq(1234)
     expect(service_host[:uuid]).to eq("81E3C1D4-C040-4D59-A56F-4273384D576B")
   end
+
+  it 'catches missing host requirements' do
+    host_type :type_a do
+    end
+    host_type :type_b do
+    end
+    environment_type :needy_environment do
+      need :type_a, :type_b
+    end
+    builder = EnvironmentBuilder.new(:needy_environment)
+    builder.type_a "0.0.0.0" do end
+    # No type_b specified
+    expect { builder.finish }.to raise_error(ArgumentError)
+  end
 end
