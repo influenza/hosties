@@ -89,7 +89,7 @@ class EnvironmentBuilder < UsesAttributes
           if @hosts[host_type].nil? then @hosts[host_type] = [] end
           @hosts[host_type] << builder.finish
         rescue ArgumentError => ex
-          puts "Problem declaring host: #{ex}"
+          #puts "Problem declaring host: #{ex}"
           raise ex
         end
       end
@@ -116,7 +116,7 @@ def environment_for(type, &block)
     builder.instance_eval(&block)
     data = builder.finish
   rescue ArgumentError => ex
-    puts "Problem declaring environment: #{ex}"
+    #puts "Problem declaring environment: #{ex}"
     raise ex
   end
 end
