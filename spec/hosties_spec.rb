@@ -39,7 +39,16 @@ describe Hosties do
     expect(Hosties::EnvironmentDefinitions.include? :failure).to eq(false)
   end
 
-  it 'turns host descriptions into properly constrained instances' do
+  it 'can work metaprogramming magics' do
+    definition = HasAttributes.new
+    definition.have_attributes(:x, :y, :z)
+    definition.where(:x).can_be("hello", "turkey", 42)
+    instance = UsesAttributes.new(definition)
+    instance.y = "Why?!"
+    expect(instance.y).to eq("Why?!")
+    expect { instance.x = 31 }.to raise_error(ArgumentError)
+    instance.x = "turkey"
+    expect(instance.x).to eq("turkey")
   end
 
   it 'can constrain attributes' do
@@ -49,6 +58,5 @@ describe Hosties do
       where(:awesomeness).can_be :terribad, :s_ok, :great
     end
   end
-
 
 end

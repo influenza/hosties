@@ -1,4 +1,5 @@
 require 'hosties/definitions'
+require 'hosties/reification'
 
 # A library to provide easily readable environment definitions.
 module Hosties
@@ -6,6 +7,6 @@ module Hosties
   EnvironmentDefinitions = {}
   # Host definitions, keyed by type
   HostDefinitions = {}
-  # Environment instances, keyed by name
+  # Environment instances, definition type => array of instances
   RegisteredEnvironments = {}
 end
