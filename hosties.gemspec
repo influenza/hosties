@@ -1,7 +1,7 @@
 Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec', '~> 2.5'
   spec.name = 'hosties'
-  spec.version = '1.0.0'
+  spec.version = '1.0.1'
   spec.date = '2013-05-03'
   spec.summary = 'Easy environment description'
   spec.description = <<-DESC
