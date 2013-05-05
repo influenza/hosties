@@ -104,3 +104,5 @@ In future versions, this will be changed from a raw hash to something friendlier
 For best organization, declare the definitions in a separate file that is included in the
 description file. For instance, splitting out the `host_type` and `environment_type` into
 a file separate from the `environment_for` block.
+
+A more thorough explanation can be found [here](http://dahlgren.so/projects/2013/05/05/Hosties/)
