@@ -23,7 +23,7 @@ From this point, you can start using hosties to expressively declare environment
 Often times, when you have a medium-sized project, there's a lot of code around 
 performing automated deployments. I've found Ruby to be a really good fit for this
 so when I can't use a full-blown configuration management tool (like [chef](http://www.opscode.com/chef/)), 
-I always end up rolling my own scripts. Alongside these scripts are usually a file 
+I always end up rolling my own scripts. Alongside these scripts there's usually a file 
 containing all of the hosts for the various environments. The deployment tools, 
 often exposed as a one-click affair through some web front-end, are intended for 
 use by everyone, not just me. The other people at my organization might not be 
@@ -35,7 +35,7 @@ ridiculously named gem for defining product deployment environments!
 ### Example
 
 Declare a product type that has web hosts, service hosts, and monitoring hosts
-```
+```ruby
 require 'hosties'
 
 # First, describe the host types that we'll be using
