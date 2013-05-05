@@ -10,11 +10,16 @@ $ cd hosties
 $ rake
 ```
 
-Now you can install the gem from the source (it'll be pushed to rubygems.org soon):
+Now you can install the gem from the source for the bleeding edge:
 
 ```
 $ gem build ./hosties.gemspec
-$ gem install ./hosties-0.0.1.gem
+$ gem install ./hosties-1.0.0.gem
+```
+
+Or, install the gem from [rubygems](http://www.rubygems.org):
+```
+$ gem install hosties
 ```
 
 From this point, you can start using hosties to expressively declare environments!
