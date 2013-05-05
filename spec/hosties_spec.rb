@@ -39,7 +39,7 @@ describe Hosties do
     expect(Hosties::EnvironmentDefinitions.include? :failure).to eq(false)
   end
 
-  it 'can work metaprogramming magics' do
+  it 'can enforce attribute constraints' do
     definition = HasAttributes.new
     definition.have_attributes(:x, :y, :z)
     definition.where(:x).can_be("hello", "turkey", 42)
@@ -51,12 +51,35 @@ describe Hosties do
     expect(instance.x).to eq("turkey")
   end
 
-  it 'can constrain attributes' do
-    host_type :that_novel do
-      have_attributes :length, :awesomeness
-      where(:length).can_be :short, :medium, :long, :omg_srsly
-      where(:awesomeness).can_be :terribad, :s_ok, :great
+  it 'can declare a host' do
+    host_type :special_host do
     end
+    instance = HostBuilder.new(:special_host, "0.0.0.0")
+    expect(instance.finish).to eq({ :hostname => "0.0.0.0"})
   end
 
+  it 'catches missing services' do
+    host_type :web_host do
+      have_service :http
+    end
+    instance = HostBuilder.new(:web_host, "0.0.0.0")
+    expect { instance.finish }.to raise_error(ArgumentError)
+  end
+
+  it 'catches missing attributes' do
+    host_type :mud_server do
+      have_attribute :version
+    end
+    instance = HostBuilder.new(:mud_server, "0.0.0.0")
+    expect { instance.finish }.to raise_error(ArgumentError)
+  end
+
+  it 'catches non-integral service ports' do
+    host_type :web_host do
+      have_service :http
+    end
+    instance = HostBuilder.new(:web_host, "0.0.0.0")
+    instance.http = 10.4
+    expect { instance.finish }.to raise_error(ArgumentError)
+  end
 end

@@ -10,6 +10,7 @@ class UsesAttributes
     end
   end
   def initialize(has_attributes)
+    @attributes = has_attributes.attributes
     # Magic.
     has_attributes.attributes.each do |attr|
       # Add in the attribute
@@ -22,6 +23,18 @@ class UsesAttributes
       # Define a liberal accessor
       self.metaclass.send(:define_method, attr) do instance_variable_get "@#{attr}" end
     end
+  end
+
+  # Return a hash after verifying everything was set correctly
+  def finish
+    retval = {}
+    # Ensure all required attributes have been set
+    @attributes.each do |attr|
+      val = instance_variable_get "@#{attr}"
+      raise ArgumentError, "Missing attribute #{attr}" if val.nil?
+      retval[attr] = val
+    end
+    retval
   end
 end
 
@@ -41,7 +54,7 @@ class HostBuilder < UsesAttributes
     @definition.services.each do |service_type|
       self.metaclass.send(:attr_accessor, service_type)
       self.metaclass.send(:define_method, service_type) do |port|
-        raise ArgumentError, "Port number required" unless port.is_a? Numeric
+        raise ArgumentError, "Port number required" unless port.is_a? Integer
         instance_variable_set "@#{service_type}", port
         self.metaclass.send(:define_method, service_type) do 
           instance_variable_get "@#{service_type}" 
@@ -51,16 +64,12 @@ class HostBuilder < UsesAttributes
   end
 
   def finish
-    # Ensure all require attributes have been set
-    @definition.attributes.each do |attr|
-      raise ArgumentError, "Missing attribute #{attr}" if instance_variable_set "@#{attr}".nil?
-    end
     # Ensure all services have been set
     @definition.services.each do |svc|
       raise ArgumentError, "Missing service #{svc}" if instance_variable_set "@#{svc}".nil?
     end
     # TODO: More clever data repackaging
-    { :hostname => @hostname }
+    super.merge({ :hostname => @hostname })
   end
 end
 
@@ -92,8 +101,9 @@ class EnvironmentBuilder < UsesAttributes
     if Hosties::RegisteredEnvironments[@type].nil? then
       Hosties::RegisteredEnvironments[@type] = []
     end
-    # TODO: Actually do some repackaging of the data here
-    Hosties::RegisteredEnvironments[@name] << self
+    retval = super.merge({ :hosts => @hosts })
+    Hosties::RegisteredEnvironments[@name] << retval
+    retval
   end
 end
 
