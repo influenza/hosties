@@ -27,15 +27,38 @@ end
 
 class HostBuilder < UsesAttributes
   def initialize(type, hostname)
-    if Hosties::HostDefinitions[@type].nil? then
+    if Hosties::HostDefinitions[type].nil? then
       raise ArgumentError, "Unrecognized host type"
     end
     @type = type
     @definition = Hosties::HostDefinitions[@type]
     @hostname = hostname
     super(@definition) # Creates attribute code
+    # Services are really just a special kind of attribute, but for now I'll
+    # keep them separate. I'm thinking maybe I could add a new type of attribute
+    # constraint that let's a user specify that an attribute must be numeric, or
+    # a string for instance.
+    @definition.services.each do |service_type|
+      self.metaclass.send(:attr_accessor, service_type)
+      self.metaclass.send(:define_method, service_type) do |port|
+        raise ArgumentError, "Port number required" unless port.is_a? Numeric
+        instance_variable_set "@#{service_type}", port
+        self.metaclass.send(:define_method, service_type) do 
+          instance_variable_get "@#{service_type}" 
+        end
+      end
+    end
   end
+
   def finish
+    # Ensure all require attributes have been set
+    @definition.attributes.each do |attr|
+      raise ArgumentError, "Missing attribute #{attr}" if instance_variable_set "@#{attr}".nil?
+    end
+    # Ensure all services have been set
+    @definition.services.each do |svc|
+      raise ArgumentError, "Missing service #{svc}" if instance_variable_set "@#{svc}".nil?
+    end
     # TODO: More clever data repackaging
     { :hostname => @hostname }
   end
@@ -44,7 +67,7 @@ end
 # Turn a description into a useful data structure - and it's validated!
 class EnvironmentBuilder < UsesAttributes
   def initialize(type)
-    if Hosties::EnvironmentDefinitions[@type].nil? then
+    if Hosties::EnvironmentDefinitions[type].nil? then
       raise ArgumentError, "Unrecognized environment type"
     end
     @hosts = []
