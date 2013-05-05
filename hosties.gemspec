@@ -11,7 +11,7 @@ Gem::Specification.new do |spec|
   spec.authors = ['Ron Dahlgren']
   spec.email = 'ronald.dahlgren@gmail.com'
   spec.files = Dir.glob("lib/**/*.rb")
-  spec.files = ['lib/hosties.rb']
   spec.test_files = Dir.glob("spec/**/*.rb")
   spec.homepage = 'https://github.com/influenza/hosties'
+  spec.license = 'BSD-new'
 end
