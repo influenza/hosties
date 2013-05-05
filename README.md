@@ -95,3 +95,7 @@ using the following hashes:
 - **Hosties::GroupedEnvironments** - Mapping of environment type to a hash of values for the grouped_by attribute to a list of matches, for instance, Hosties::GroupedEnvironments[:AmazingService][:dev] to get a list containing the environment above.
 
 In future versions, this will be changed from a raw hash to something friendlier to work with.
+
+For best organization, declare the definitions in a separate file that is included in the
+description file. For instance, splitting out the `host_type` and `environment_type` into
+a file separate from the `environment_for` block.
