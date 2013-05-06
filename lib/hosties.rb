@@ -1,5 +1,6 @@
 require 'hosties/definitions'
 require 'hosties/reification'
+require 'hosties/easydata'
 
 # A library to provide easily readable environment definitions.
 module Hosties

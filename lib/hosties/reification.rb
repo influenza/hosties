@@ -64,7 +64,7 @@ class HostBuilder < UsesAttributes
     @definition.services.each do |svc|
       raise ArgumentError, "Missing service #{svc}" if @service_ports[svc].nil?
     end
-    # TODO: More clever data repackaging
+    # TODO: Declare these reserved names
     super.merge({ :hostname => @hostname, :type => @type }).merge(@service_ports)
   end
 end
@@ -75,7 +75,7 @@ class EnvironmentBuilder < UsesAttributes
     if Hosties::EnvironmentDefinitions[type].nil? then
       raise ArgumentError, "Unrecognized environment type"
     end
-    @hosts = {} # host type => array of hosts' data
+    @hosts = [] 
     @type = type
     @definition = Hosties::EnvironmentDefinitions[@type]
     super(@definition) # Creates attribute code
@@ -86,8 +86,7 @@ class EnvironmentBuilder < UsesAttributes
         begin
           builder = HostBuilder.new(host_type, hostname)
           builder.instance_eval(&block)
-          if @hosts[host_type].nil? then @hosts[host_type] = [] end
-          @hosts[host_type] << builder.finish
+          @hosts << Hosties::EasyData.fromHost(builder.finish)
         rescue ArgumentError => ex
           #puts "Problem declaring host: #{ex}"
           raise ex
@@ -99,19 +98,11 @@ class EnvironmentBuilder < UsesAttributes
   def finish
     # Verify all of the required hosts were set
     @definition.hosts.each do |host_type| 
-      raise ArgumentError, "Missing #{host_type} host" unless @hosts.include? host_type
-    end
-    retval = super.merge({ :hosts => @hosts })
-    Hosties::Environments[@type] << retval
-    # Add ourselves into the grouped listing if necessary
-    attr = @definition.grouping
-    unless attr.nil? then # TODO: This is really ugly
-      if Hosties::GroupedEnvironments[@type].nil? then
-        Hosties::GroupedEnvironments[@type] = Hash.new{|h,k| h[k] = []}
+      unless @hosts.detect { |host| host.type == host_type } then
+        raise ArgumentError, "Missing #{host_type} host" 
       end
-      Hosties::GroupedEnvironments[@type][retval[attr]] << retval
     end
-    retval
+    super.merge({ :hosts => @hosts })
   end
 end
 
@@ -120,6 +111,16 @@ def environment_for(type, &block)
     builder = EnvironmentBuilder.new(type)
     builder.instance_eval(&block)
     data = builder.finish
+    nice_version = Hosties::EasyData.fromEnv(data)
+    Hosties::Environments[type] << nice_version
+    definition = Hosties::EnvironmentDefinitions[type]
+    # Add into the grouped listing if necessary
+    unless definition.grouping.nil? then 
+      if Hosties::GroupedEnvironments[type].nil? then
+        Hosties::GroupedEnvironments[type] = Hash.new{|h,k| h[k] = []}
+      end
+      Hosties::GroupedEnvironments[type][data[definition.grouping]] << nice_version
+    end
   rescue ArgumentError => ex
     puts "Problem declaring environment: #{ex}"
     raise ex
