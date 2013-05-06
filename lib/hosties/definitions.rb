@@ -37,6 +37,8 @@ class HasAttributes
   end
 
   alias_method :have_attribute, :have_attributes
+  alias_method :has_attribute, :have_attribute
+  alias_method :has_attributes, :have_attributes
 
   # Helpful method to define constraints
   def where(name)
@@ -71,6 +73,8 @@ class HostRequirement < HasAttributes
   end
 
   alias_method :have_service, :have_services
+  alias_method :has_service, :have_service
+  alias_method :has_services, :have_services
 
   def finished
     Hosties::HostDefinitions[@type] = self
