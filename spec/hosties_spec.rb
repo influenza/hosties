@@ -85,6 +85,7 @@ describe Hosties do
     expect(data.hosts_by_type(:monitoring).size).to eq(2) # Two monitoring hosts
     expect(data.hosts_by_type(:service_host).size).to eq(1)
     service_host = data.hosts_by_type(:service_host).first
+    expect(service_host.hostname).to eq("192.168.0.3")
     expect(service_host.service_port).to eq(1234)
     expect(service_host.uuid).to eq("81E3C1D4-C040-4D59-A56F-4273384D576B")
   end
