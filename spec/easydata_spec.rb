@@ -6,7 +6,7 @@ describe Hosties::EasyData do
       have_service :http
       have_attribute :attr_one
     end
-    builder = HostBuilder.new(:easydata_one, "localhost")
+    builder = Hosties::HostBuilder.new(:easydata_one, "localhost")
     builder.http 80
     builder.attr_one "One!"
     result = Hosties::EasyData.fromHost(builder.finish)
@@ -24,7 +24,7 @@ describe Hosties::EasyData do
       have_attribute :environment
       where(:environment).can_be :dev, :testing
     end
-    builder = EnvironmentBuilder.new :easydata_one
+    builder = Hosties::EnvironmentBuilder.new :easydata_one
     builder.easydata_two "0.0.0.0" do end
     builder.easydata_three "1.1.1.1" do end
     builder.environment :dev

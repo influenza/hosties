@@ -1,14 +1,14 @@
 require 'spec_helper'
 
-describe HasAttributes do
+describe Hosties::HasAttributes do
   it 'rejects definitions with constraints on nonexistent attributes' do
-    instance = HasAttributes.new
+    instance = Hosties::HasAttributes.new
     instance.have_attributes :foo, :bar
     expect { instance.where(:baz).can_be("anything") }.to raise_error(ArgumentError)
   end
 end
 
-describe HostRequirement do
+describe Hosties::HostRequirement do
   it 'defines host types' do
     # Declare a host type
     host_type :logger do
@@ -18,7 +18,7 @@ describe HostRequirement do
   end
 end
 
-describe EnvironmentRequirement do
+describe Hosties::EnvironmentRequirement do
   it 'defines environments with host and attribute requirements' do
     host_type :mutant_maker do end
     host_type :turkey_blaster do end
@@ -29,12 +29,12 @@ describe EnvironmentRequirement do
   end
 
   it 'rejects environment definitions that need undefined host types' do
-    builder = EnvironmentRequirement.new(:failure)
+    builder = Hosties::EnvironmentRequirement.new(:failure)
     expect { builder.need(:nonexistent) }.to raise_error(ArgumentError)
   end
 
   it 'rejects groupings for unknown attributes' do
-    builder = EnvironmentRequirement.new(:failure)
+    builder = Hosties::EnvironmentRequirement.new(:failure)
     expect { builder.grouped_by(:nonexistent) }.to raise_error(ArgumentError)
   end
 end

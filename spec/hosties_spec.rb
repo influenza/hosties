@@ -4,7 +4,7 @@ describe Hosties do
   it 'can declare a host' do
     host_type :special_host do
     end
-    instance = HostBuilder.new(:special_host, "0.0.0.0")
+    instance = Hosties::HostBuilder.new(:special_host, "0.0.0.0")
     expect(instance.finish).to eq({ :hostname => "0.0.0.0", :type => :special_host})
   end
 
@@ -12,7 +12,7 @@ describe Hosties do
     host_type :web_host do
       have_service :http
     end
-    instance = HostBuilder.new(:web_host, "0.0.0.0")
+    instance = Hosties::HostBuilder.new(:web_host, "0.0.0.0")
     expect { instance.finish }.to raise_error(ArgumentError)
   end
 
@@ -20,7 +20,7 @@ describe Hosties do
     host_type :mud_server do
       have_attribute :version
     end
-    instance = HostBuilder.new(:mud_server, "0.0.0.0")
+    instance = Hosties::HostBuilder.new(:mud_server, "0.0.0.0")
     expect { instance.finish }.to raise_error(ArgumentError)
   end
 
@@ -28,7 +28,7 @@ describe Hosties do
     host_type :web_host do
       have_service :http
     end
-    instance = HostBuilder.new(:web_host, "0.0.0.0")
+    instance = Hosties::HostBuilder.new(:web_host, "0.0.0.0")
     expect { instance.http 10.4 }.to raise_error(ArgumentError)
   end
 
@@ -40,7 +40,7 @@ describe Hosties do
     environment_type :needy_environment do
       need :type_a, :type_b
     end
-    builder = EnvironmentBuilder.new(:needy_environment)
+    builder = Hosties::EnvironmentBuilder.new(:needy_environment)
     builder.type_a "0.0.0.0" do end
     # No type_b specified
     expect { builder.finish }.to raise_error(ArgumentError)

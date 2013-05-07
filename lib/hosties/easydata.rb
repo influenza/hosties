@@ -2,16 +2,15 @@
 # Provide a more convenient data structure to work with once  #
 # environment declarations have been read.                    #
 ###############################################################
-class DataWrapper
-  def metaclass
-    class << self
-      self
-    end
-  end
-end
-
 module Hosties
   module EasyData
+    class DataWrapper
+      def metaclass
+        class << self
+          self
+        end
+      end
+    end
     def self.fromHost(hash)
       result = DataWrapper.new
       hash.each do |k, v|
