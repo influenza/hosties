@@ -37,4 +37,15 @@ describe Hosties::EnvironmentRequirement do
     builder = Hosties::EnvironmentRequirement.new(:failure)
     expect { builder.grouped_by(:nonexistent) }.to raise_error(ArgumentError)
   end
+
+  it 'can define host-inherited attributes ' do
+    builder = Hosties::EnvironmentRequirement.new(:inherit_provider)
+    builder.has_attribute :to_inherit
+    builder.hosts_inherit :to_inherit
+  end
+
+  it 'catches faulty hosts_inherit clauses' do
+    builder = Hosties::EnvironmentRequirement.new(:inherit_failure)
+    expect { builder.hosts_inherit :to_inherit }.to raise_error(ArgumentError)
+  end
 end

@@ -33,6 +33,15 @@ module Hosties
       result.metaclass.send(:define_method, :each_host) do |&block|
         yield self.hosts
       end
+      # Apply all of the host_attributes to our little host children
+      definition = Hosties::EnvironmentDefinitions[hash[:type]]
+      inheritance = definition.host_attributes
+      hash[:hosts].each do |host|
+        inheritance.each do |attr|
+          val = hash[attr]
+          host.metaclass.send(:define_method, attr) do val end
+        end
+      end
       result
     end
   end

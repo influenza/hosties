@@ -104,7 +104,7 @@ module Hosties
           raise ArgumentError, "Missing #{host_type} host" 
         end
       end
-      super.merge({ :hosts => @hosts })
+      super.merge({ :type => @type, :hosts => @hosts })
     end
   end
 end

@@ -111,4 +111,21 @@ describe Hosties do
     expect(Hosties::GroupedEnvironments[:foobar][:dev].size).to eq(1)
     expect(Hosties::GroupedEnvironments[:foobar][:qa].size).to eq(1)
   end
+
+  it 'lets hosts inherit attributes' do
+    host_type :beneficiary do end# ha.
+    environment_type :benefactor do
+      need :beneficiary
+      has_attribute :monies
+      hosts_inherit :monies # Lucky!
+    end
+    amount = 1000000
+    environment_for :benefactor do
+      beneficiary "0.0.0.0" do end
+      # Prove that ordering doesn't matter here
+      monies amount
+    end
+    beneficiary = Hosties::Environments[:benefactor].first.hosts.first
+    expect(beneficiary.monies).to eq(amount)
+  end
 end

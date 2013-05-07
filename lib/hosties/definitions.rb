@@ -85,10 +85,11 @@ module Hosties
 
   # Used to describe an environment.
   class EnvironmentRequirement < HasAttributes
-    attr_reader :type, :hosts, :grouping
+    attr_reader :type, :hosts, :grouping, :host_attributes
     def initialize(type)
       super()
       @type = type
+      @host_attributes = []
       @hosts = []
     end
 
@@ -102,6 +103,13 @@ module Hosties
         raise ArgumentError, "Unrecognized host type"
       end
       @hosts += sum
+    end
+
+    def hosts_inherit(attr)
+      unless self.attributes.include? attr then
+        raise ArgumentError, "Unrecognized attribute #{attr}"
+      end
+      @host_attributes << attr
     end
 
     # Optionally specify an attribute to group by when registering 
