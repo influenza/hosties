@@ -116,6 +116,8 @@ class EnvironmentRequirement < HasAttributes
     @hosts += sum
   end
 
+  alias_method :needs, :need
+
   # Optionally specify an attribute to group by when registering 
   # environments of this type.
   def grouped_by(attr) 
