@@ -105,6 +105,8 @@ module Hosties
       @hosts += sum
     end
 
+    alias_method :needs, :need
+
     def hosts_inherit(attr)
       unless self.attributes.include? attr then
         raise ArgumentError, "Unrecognized attribute #{attr}"
