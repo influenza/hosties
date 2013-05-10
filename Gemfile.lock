@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    hosties (1.1.0.alpha)
+    hosties (1.1.0.alpha2)
 
 GEM
   remote: https://rubygems.org/
