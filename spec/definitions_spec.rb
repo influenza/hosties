@@ -16,6 +16,14 @@ describe Hosties::HostRequirement do
       have_attributes :control_mbean, :default_user
     end
   end
+
+  it 'rejects definitions with reserved attribute names' do
+    builder = Hosties::HostRequirement.new(:failsauce)
+    # hostname
+    expect { builder.have_attributes(:hostname) }.to raise_error(ArgumentError)
+    # type
+    expect { builder.have_attributes(:type) }.to raise_error(ArgumentError)
+  end
 end
 
 describe Hosties::EnvironmentRequirement do
@@ -26,6 +34,14 @@ describe Hosties::EnvironmentRequirement do
       need :mutant_maker, :turkey_blaster
       have_attribute :weirdness_factor
     end
+  end
+
+  it 'rejects definitions with reserved attribute names' do
+    builder = Hosties::EnvironmentRequirement.new(:failsauce)
+    # hosts
+    expect { builder.have_attributes(:hosts) }.to raise_error(ArgumentError)
+    # type
+    expect { builder.have_attributes(:type) }.to raise_error(ArgumentError)
   end
 
   it 'rejects environment definitions that need undefined host types' do

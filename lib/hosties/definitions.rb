@@ -27,14 +27,20 @@ module Hosties
   class HasAttributes
     attr_accessor :constraints
     attr_accessor :attributes
-    def initialize
+
+    def initialize(verbotten = [])
       @constraints = {}
       @attributes = []
+      @verbotten = verbotten
     end
 
     # Specify symbols that will later be reified into attributes
     def have_attributes(attr, *more)
-     @attributes += (more << attr)
+      sum = (more << attr)
+      sum.each do |name|
+        raise ArgumentError, "Reserved attribute name #{name}" if @verbotten.include?(name)
+      end
+      @attributes += sum
     end
 
     alias_method :have_attribute, :have_attributes
@@ -60,7 +66,7 @@ module Hosties
   class HostRequirement < HasAttributes
     attr_reader :type, :services
     def initialize(type)
-      super()
+      super([:hostname, :type])
       @type = type
       @services = []
     end
@@ -87,7 +93,7 @@ module Hosties
   class EnvironmentRequirement < HasAttributes
     attr_reader :type, :hosts, :grouping, :host_attributes
     def initialize(type)
-      super()
+      super([:type, :hosts])
       @type = type
       @host_attributes = []
       @hosts = []
@@ -131,24 +137,12 @@ end
 
 def environment_type(symbol, &block)
   builder = Hosties::EnvironmentRequirement.new(symbol)
-  begin
-    builder.instance_eval(&block)
-    builder.finished
-  rescue ArgumentError => ex
-    # TODO: Same as above, find a better way to get this information out
-    #puts "Problem describing environment \"#{builder.type}\": #{ex}"
-  end
+  builder.instance_eval(&block)
+  builder.finished
 end
 
 def host_type(symbol, &block)
   builder = Hosties::HostRequirement.new(symbol)
-  begin
-    builder.instance_eval(&block)
-    builder.finished
-  rescue ArgumentError => ex
-    # TODO: There must be a better way!
-    # I'd like to provide some feedback in this case, but I don't 
-    # like having this show up in test output. 
-    #puts "Problem defining host \"#{symbol}\": #{ex}"
-  end
+  builder.instance_eval(&block)
+  builder.finished
 end
