@@ -19,7 +19,7 @@ $ gem build ./hosties.gemspec
 $ gem install ./hosties-1.0.0.gem
 ```
 
-Or, install the gem from [rubygems](http://www.rubygems.org):
+Or, install the gem from [rubygems](http://rubygems.org/gems/hosties):
 ```
 $ gem install hosties
 ```
