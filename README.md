@@ -1,5 +1,6 @@
 # Hosties
 A Ruby gem for describing environments in an easy to read format. 
+[![Build Status](https://travis-ci.org/influenza/hosties.png)](https://travis-ci.org/influenza/hosties)
 
 ### Quick Start
 Clone the repo, verify the tests:
