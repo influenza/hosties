@@ -90,7 +90,6 @@ module Hosties
             builder.instance_eval(&block)
             @hosts << Hosties::EasyData.fromHost(builder.finish)
           rescue ArgumentError => ex
-            #puts "Problem declaring host: #{ex}"
             raise ex
           end
         end
