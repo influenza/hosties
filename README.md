@@ -107,4 +107,4 @@ For best organization, declare the definitions in a separate file that is includ
 description file. For instance, splitting out the `host_type` and `environment_type` into
 a file separate from the `environment_for` block.
 
-A more thorough explanation can be found [here](http://dahlgren.work/projects/2013/05/05/Hosties/)
+A more thorough explanation can be found [here](http://dahlgren.work/ruby/2013/05/05/Hosties/).
